@@ -24,17 +24,23 @@ DEBUG = os.environ.get('DEBUG', '1') == '1'
 # --- Database -----------------------------------------------------------------
 # Put the DB under a writable folder that survives git pulls / webapp
 # reloads. On PythonAnywhere HOME=/home/<user> is always writable.
+#
+# IMPORTANT: We deliberately read LNKTO_DATABASE_URL (not DATABASE_URL)
+# because PythonAnywhere automatically exports DATABASE_URL on every
+# account, pointing at their bundled MySQL DB. If we honoured that var
+# without the user explicitly opting in, the app would try to import
+# pymysql and crash on accounts that haven't set it up.
 _DEFAULT_DB_DIR = os.path.join(
     os.environ.get('HOME', APPLICATION_DIR), 'LnkTo_data'
 )
-DB_DIR = os.environ.get('DB_DIR', _DEFAULT_DB_DIR)
+DB_DIR = os.environ.get('LNKTO_DB_DIR', _DEFAULT_DB_DIR)
 try:
     os.makedirs(DB_DIR, exist_ok=True)
 except OSError:
     # Fall back to project dir if we can't create the target folder.
     DB_DIR = APPLICATION_DIR
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL',
+    'LNKTO_DATABASE_URL',
     'sqlite:///' + os.path.join(DB_DIR, 'shortener.db'),
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -43,10 +49,22 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 STATIC_DIR = os.path.join(APPLICATION_DIR, 'static')
 
 # --- Server name -------------------------------------------------------------
-# Only force SERVER_NAME for the local dev server (so url_for() produces
-# http://localhost:5001/...). Leave it unset in production so Flask uses the
-# actual request host (e.g. https://you.pythonanywhere.com).
-if os.environ.get('FLASK_ENV') != 'production':
-    SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost:5001')
-else:
+# Flask's url_for() uses SERVER_NAME (when set) to build absolute URLs.
+# We only want it set for the LOCAL dev server (so links look like
+# http://localhost:5001/...). On any deployed environment — PythonAnywhere,
+# Render, anywhere else — it must be None so Flask uses the actual request
+# host (e.g. https://you.pythonanywhere.com).
+#
+# We treat the app as "production" if ANY of these are true:
+#   - FLASK_ENV=production
+#   - DEBUG=0 or unset
+# Otherwise it's a local dev server.
+_IS_PROD = (
+    os.environ.get('FLASK_ENV', '').lower() == 'production'
+    or os.environ.get('LNKTO_ENV', '').lower() == 'production'
+    or os.environ.get('DEBUG', '1') == '0'
+)
+if _IS_PROD:
     SERVER_NAME = None
+else:
+    SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost:5001')
