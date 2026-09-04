@@ -1,18 +1,52 @@
 import os
 
-DB_USERNAME = 'z'
-DB_PASSWORD = 'potato6'
-DB_DATABASE_NAME = 'shortener'
-DB_HOST = os.getenv('IP', '127.0.0.1')
 APPLICATION_DIR = os.path.dirname(os.path.realpath(__file__))
-SQLALCHEMY_TRACK_MODIFICATIONS = True
-DEBUG = True
-SECRET_KEY = '<$üP3rPazzWø£D>'
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://%s:%s@%s/%s" % (
-    DB_USERNAME, DB_PASSWORD, DB_HOST, DB_DATABASE_NAME)
+
+# --- Production-safe defaults -------------------------------------------------
+# Anything you want to change per environment should be set via env vars
+# (PythonAnywhere: "Web" tab → "Environment variables" / .env locally).
+#
+#   SECRET_KEY  -> MUST be set in production. A static string here is fine
+#                  for local dev but should never ship to a public host.
+#   DEBUG        -> "1" to enable Flask debug mode, anything else disables it.
+#   DB_DIR       -> folder for the SQLite file. Defaults to ~/LnkTo_data on
+#                   PythonAnywhere, project dir elsewhere.
+
+# SECRET_KEY fallback for local dev only. In production PythonAnywhere will
+# inject a real SECRET_KEY through the webapp's env vars.
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'dev-only-change-me-please'
+)
+
+DEBUG = os.environ.get('DEBUG', '1') == '1'
+
+# --- Database -----------------------------------------------------------------
+# Put the DB under a writable folder that survives git pulls / webapp
+# reloads. On PythonAnywhere HOME=/home/<user> is always writable.
+_DEFAULT_DB_DIR = os.path.join(
+    os.environ.get('HOME', APPLICATION_DIR), 'LnkTo_data'
+)
+DB_DIR = os.environ.get('DB_DIR', _DEFAULT_DB_DIR)
+try:
+    os.makedirs(DB_DIR, exist_ok=True)
+except OSError:
+    # Fall back to project dir if we can't create the target folder.
+    DB_DIR = APPLICATION_DIR
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    'DATABASE_URL',
+    'sqlite:///' + os.path.join(DB_DIR, 'shortener.db'),
+)
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# --- Static ------------------------------------------------------------------
 STATIC_DIR = os.path.join(APPLICATION_DIR, 'static')
-RECAPTCHA_PUBLIC_KEY = '<Your own keys from Google>'
-RECAPTCHA_PRIVATE_KEY = '<You can get these keys at https://www.google.com/recaptcha/admin>'
-RECAPTCHA_DATA_ATTRS = {'theme': 'dark'}
-SERVER_NAME = 'localhost:5001'
-# SERVER_NAME = 'YourDomain.com'
+
+# --- Server name -------------------------------------------------------------
+# Only force SERVER_NAME for the local dev server (so url_for() produces
+# http://localhost:5001/...). Leave it unset in production so Flask uses the
+# actual request host (e.g. https://you.pythonanywhere.com).
+if os.environ.get('FLASK_ENV') != 'production':
+    SERVER_NAME = os.environ.get('SERVER_NAME', 'localhost:5001')
+else:
+    SERVER_NAME = None

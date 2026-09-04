@@ -12,9 +12,24 @@
       {{ field.csrf_token }}
       {{ field(placeholder="Enter full URL", class="input__url" ) }}
       {% endfor %}
+      <!-- ALTCHA: free, open-source, no API key required.
+           Widget auto-runs a proof-of-work challenge and stores
+           the result in the hidden input below. -->
+      <altcha-widget
+        challengeurl="{{ url_for('altcha_challenge') }}"
+        hidefooter
+        auto="onload"
+        style="--altcha-max-width:100%;margin:10px 0;">
+      </altcha-widget>
       <input type="submit" class="btn" value="Shorten URL &raquo;" />
     </div>
   </form>
 </div>
+
+<!-- Load ALTCHA widget from a CDN. No API key needed. -->
+<script
+  src="https://cdn.jsdelivr.net/npm/altcha/dist/altcha.min.js"
+  type="module"
+></script>
 
 {% endblock %}

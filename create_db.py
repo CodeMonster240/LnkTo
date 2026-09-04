@@ -1,7 +1,9 @@
 import os
 import sys
 sys.path.append(os.getcwd())
-from main import db
+from app import app, db
 
 if __name__ == '__main__':
-    db.create_all()
+    with app.app_context():
+        db.create_all()
+    print("Database created at:", app.config['SQLALCHEMY_DATABASE_URI'])

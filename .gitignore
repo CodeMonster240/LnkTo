@@ -1,1 +1,10 @@
-*__pycache__*
+*__pycache__/
+*.pyc
+*.db
+*.sqlite
+*.sqlite3
+LnkTo_data/
+.venv/
+.env
+.idea/
+.vscode/

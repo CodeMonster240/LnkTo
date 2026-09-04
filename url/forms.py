@@ -1,7 +1,6 @@
-from flask_wtf import FlaskForm  # , RecaptchaField
+from flask_wtf import FlaskForm
 from wtforms import validators, StringField
 from wtforms.validators import Length
-# from wtforms.fields.html5 import URLField
 
 
 class UrlForm(FlaskForm):
@@ -10,7 +9,12 @@ class UrlForm(FlaskForm):
         validators.Length(
             min=4, max=2027, message="If URL\'s were that short, would you even be here?")
     ])
-    # recaptcha = RecaptchaField()
+    # ALTCHA replaces Google reCAPTCHA. It is a free, open-source,
+    # GDPR-compliant CAPTCHA that requires NO API key, account, or
+    # external service. See https://altcha.org
+    altcha = StringField('altcha', [
+        validators.InputRequired(message="Please complete the anti-spam check.")
+    ])
 
     def save_url(self, url):
         self.populate_obj(url)

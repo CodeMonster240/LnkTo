@@ -5,12 +5,12 @@
 ## Features
 
 - Shortens URLs to a default 3-digit prefix using a random character and letter combination.
-- Checks if the shortened URL already exists and attempt to re-run the code-generator until it finds an available combination.
-- All data is stored in a single MySQL table.
-- Case-sensitive. The database distinguishes between upper- and lower-case characters.
+- Checks if the shortened URL already exists and attempts to re-run the code-generator until it finds an available combination.
+- All data is stored in a single **SQLite** file (`shortener.db`) — zero database setup.
+- Case-sensitive. SQLite stores the values exactly as written.
 - A Stats page lists all the shortened URLs, and shows how many times a target link has been redirected.
 - There is a button to automatically copy the shortened URL to clipboard.
-- Has an option to use Recaptcha to prevent spambots.
+- Uses **ALTCHA** for spam protection — a free, open-source proof-of-work CAPTCHA that requires **no API key, account, or external service** (https://altcha.org).
 
 ![Screenshot](https://github.com/GlowSquid/Flask-URL-Shortener/blob/master/screenshot.gif)
 
@@ -18,11 +18,26 @@
 
 - Create a virtualenv
 - Install the requirements `pip install -r requirements.txt`
-- Update settings.py with your own MySQL credentials
-- Create the database in MySQL `CREATE DATABASE shortener;`
-- Run `python create_db.py` to setup the table
-- Lastly, alter the MySQL table to allow case-sensitive characters:
+- No credentials to configure — `settings.py` already points at a local `shortener.db` file.
+- Run the app with `python run.py` (creates the table if missing and starts the dev server).
 
-`ALTER TABLE url CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin;`
+### One-liner
 
-Run the app with `python main.py`
+If you just want the "npm start" equivalent, run:
+
+```bash
+./start.sh
+```
+
+Or, on any machine:
+
+```bash
+python run.py
+```
+
+That's it. The SQLite database file is created automatically alongside the app on first run.
+
+## Hosting on PythonAnywhere
+
+See [`pythonanywhere.md`](./pythonanywhere.md) for the full step-by-step
+(WSGI setup, virtualenv, environment variables, static files, troubleshooting).
