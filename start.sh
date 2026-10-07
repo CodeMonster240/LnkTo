@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Convenience wrapper — exactly like `npm start`.
-#   ./start.sh         # uses system python
-#   ./start.sh venv    # uses ./.venv/bin/python if it exists
+#   ./start.sh         # uses the system node
 set -e
-if [ "$1" = "venv" ] && [ -x "./.venv/bin/python" ]; then
-    PY="./.venv/bin/python"
-elif [ -x "./.venv/bin/python" ]; then
-    PY="./.venv/bin/python"
-else
-    PY="python"
+if ! command -v node >/dev/null 2>&1; then
+  echo "[start.sh] node not found in PATH. Install Node.js >= 18 first." >&2
+  exit 1
 fi
-echo "[start.sh] Using interpreter: $($PY -V)"
-exec "$PY" run.py
+if [ ! -d "node_modules" ]; then
+  echo "[start.sh] Installing dependencies (one-time)..."
+  npm install
+fi
+echo "[start.sh] Using node: $(node -v)"
+exec npm start

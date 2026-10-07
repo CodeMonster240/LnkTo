@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  settings.ejs — per-link settings page.
+  Shows a form to configure:
+    - Show Redirect Page (interstitial with animation before redirecting)
+    - Redirect Duration (seconds to show the interstitial, 1–30)
+    - Show Thumbnail (page favicon in the wormhole animation)
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings — <%= code %> · LnkTo</title>
+    <link
+      rel="stylesheet"
+      href="<%= urlFor('static', { params: { filename: 'css/style.css' } }) %>"
+      type="text/css"
+    />
+  </head>
+  <body>
+<%- include('partials/_header', { title: 'Settings', active: 'stats' }) %>
+
+  <div class="page" id="main">
+    <section class="settings-form" aria-labelledby="settings-title">
+      <div class="settings-form__head">
+        <p class="settings-form__eyebrow">Link settings</p>
+        <h1 class="settings-form__title" id="settings-title">
+          /<%= code %>
+        </h1>
+        <p class="settings-form__sub">
+          Configure how visitors experience this link.
+        </p>
+      </div>
+
+      <form
+        method="post"
+        action="<%= urlFor('settings', { params: { code } }) %>"
+        class="settings"
+        autocomplete="off"
+      >
+        <div class="field">
+          <label class="field__label" for="show-redirect-page">
+            <span>Show Redirect Page</span>
+            <span class="field__desc">
+              Show an animated interstitial page before redirecting visitors
+              to the destination.
+            </span>
+          </label>
+          <div class="toggle">
+            <input
+              type="checkbox"
+              id="show-redirect-page"
+              name="show_redirect_page"
+              value="1"
+              <%= settings.showRedirectPage ? 'checked' : '' %>
+            />
+            <label class="toggle__track" for="show-redirect-page"></label>
+          </div>
+        </div>
+
+        <div class="field" id="redirect-duration-field">
+          <label class="field__label" for="redirect-duration">
+            <span>Redirect Duration</span>
+            <span class="field__desc">
+              How many seconds the interstitial stays visible before
+              redirecting (1–30).
+            </span>
+          </label>
+          <div class="field__control">
+            <input
+              type="number"
+              id="redirect-duration"
+              name="redirect_duration"
+              min="1"
+              max="30"
+              value="<%= settings.redirectDuration || 3 %>"
+              class="field__input"
+            />
+            <span class="field__unit">seconds</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="show-thumbnail">
+            <span>Show Thumbnail</span>
+            <span class="field__desc">
+              Display the destination site's thumbnail inside the wormhole
+              animation.
+            </span>
+          </label>
+          <div class="toggle">
+            <input
+              type="checkbox"
+              id="show-thumbnail"
+              name="show_thumbnail"
+              value="1"
+              <%= settings.showThumbnail ? 'checked' : '' %>
+            />
+            <label class="toggle__track" for="show-thumbnail"></label>
+          </div>
+        </div>
+
+        <div class="settings-form__actions">
+          <button type="submit" class="btn btn--ink">Save settings</button>
+          <a class="btn btn--ghost" href="<%= urlFor('analytics', { params: { code } }) %>">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script>
+    // Hide the duration field when "Show Redirect Page" is unchecked.
+    (function () {
+      var cb = document.getElementById('show-redirect-page');
+      var dur = document.getElementById('redirect-duration-field');
+      if (!cb || !dur) return;
+      function update() {
+        dur.style.display = cb.checked ? 'block' : 'none';
+      }
+      cb.addEventListener('change', update);
+      update();
+    })();
+  </script>
+  <%- include('partials/_footer') %>
+</body>
+</html>

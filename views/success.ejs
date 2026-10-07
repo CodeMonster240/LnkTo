@@ -1,0 +1,47 @@
+<%- include('partials/_header', { title: 'Shortened', active: 'home' }) %>
+
+<section class="result" aria-labelledby="result-title">
+  <p class="result__eyebrow">Your link is ready</p>
+  <h1 class="result__title" id="result-title">
+    <span class="result__prefix">/</span><span class="result__code" data-code="<%= code %>"><%= code %></span>
+  </h1>
+
+  <div class="result__bar" role="group" aria-label="Short link actions">
+    <code class="result__link" id="short-link"><%= urlFor('index', { external: true }) %><%= code %></code>
+    <button type="button" class="result__copy" data-copy-target="short-link" aria-label="Copy short link to clipboard">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </svg>
+      <span class="result__copy-label">Copy</span>
+    </button>
+  </div>
+
+  <a class="result__target" href="<%= old %>" target="_blank" rel="noopener noreferrer">
+    <img
+      class="result__favicon"
+      src="https://www.google.com/s2/favicons?domain=<%- old.replace(/^https?:///, '").split('/')[0].split(':')[0] %>src="https://www.google.com/s2/favicons?domain=<%= old %>&sz=32"sz=32"
+      alt="Favicon for <%= old %>"
+      width="16" height="16"
+    />
+    <span class="result__target-text">Redirects to <strong><%= old %></strong></span>
+  </a>
+
+  <div class="result__actions">
+    <a class="btn btn--ink" href="<%= urlFor('analytics', { params: { code } }) %>">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 3v18h18" /><path d="M7 14l4-4 4 4 5-5" />
+      </svg>
+      <span>View analytics</span>
+    </a>
+    <a class="btn btn--ghost" href="<%= urlFor('index') %>">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14" /><path d="m5 12 7 7 7-7" />
+      </svg>
+      <span>Shorten another</span>
+    </a>
+    <a class="btn btn--ghost" href="<%= urlFor('stats') %>">All links</a>
+  </div>
+</section>
+
+<%- include('partials/_footer', { pageScript: 'success.js' }) %>

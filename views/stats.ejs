@@ -1,0 +1,117 @@
+<%- include('partials/_header', { title: 'All links', active: 'stats' }) %>
+
+<section class="list" aria-labelledby="list-title">
+  <header class="list__head">
+    <div>
+      <h1 class="list__title" id="list-title">All links</h1>
+      <p class="list__sub">
+        <% if (stats.total === 0) { %>
+          No links yet. Shorten one to start the trail.
+        <% } else { %>
+          <%= stats.total %> link<%= stats.total === 1 ? '' : 's' %>
+          &middot; <%= stats.totalPages %> page<%= stats.totalPages === 1 ? '' : 's' %>
+        <% } %>
+      </p>
+    </div>
+
+    <form class="list__search" method="get" action="<%= urlFor('stats') %>" role="search">
+      <label class="visually-hidden" for="list-q">Search links</label>
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+        </svg>
+        <input id="list-q" type="search" name="q" value="<%= stats.q %>" placeholder="Search code or destination" autocomplete="off" class="search__input" />
+      </div>
+      <input type="hidden" name="sort" value="<%= stats.sort %>" />
+    </form>
+  </header>
+
+  <% if (typeof query !== 'undefined' && query && query.deleted) { %>
+    <p class="flash flash--ok" role="status">Deleted <code>/<%= query.deleted %></code>.</p>
+  <% } %>
+
+  <% if (stats.total === 0) { %>
+    <div class="empty">
+      <p class="empty__title">No links here yet</p>
+      <p class="empty__body">Paste a long URL on the home page and it will show up here.</p>
+      <a class="btn btn--ink" href="<%= urlFor('index') %>">Shorten your first link</a>
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="tbl" aria-describedby="list-title">
+        <thead>
+          <tr>
+            <th class="tbl__th tbl__th--code">
+              <a class="tbl__sort" href="<%= urlFor('stats') %>?sort=<%= stats.sort === 'code_asc' ? 'code_desc' : 'code_asc' %>&q=<%= encodeURIComponent(stats.q) %>" aria-label="Sort by code">
+                Code <span aria-hidden="true"><%= stats.sort === 'code_asc' ? '↑' : stats.sort === 'code_desc' ? '↓' : '↕' %></span>
+              </a>
+            </th>
+            <th class="tbl__th tbl__th--dest">Destination</th>
+            <th class="tbl__th tbl__th--hits">
+              <a class="tbl__sort" href="<%= urlFor('stats') %>?sort=<%= stats.sort === 'hits_desc' ? 'hits_asc' : 'hits_desc' %>&q=<%= encodeURIComponent(stats.q) %>" aria-label="Sort by hits">
+                Hits <span aria-hidden="true"><%= stats.sort === 'hits_desc' ? '↓' : stats.sort === 'hits_asc' ? '↑' : '↕' %></span>
+              </a>
+            </th>
+            <th class="tbl__th tbl__th--when">
+              <a class="tbl__sort" href="<%= urlFor('stats') %>?sort=<%= stats.sort === 'oldest' ? 'recent' : 'oldest' %>&q=<%= encodeURIComponent(stats.q) %>" aria-label="Sort by date">
+                Created <span aria-hidden="true"><%= stats.sort === 'oldest' ? '↑' : stats.sort === 'recent' ? '↓' : '↕' %></span>
+              </a>
+            </th>
+            <th class="tbl__th tbl__th--actions" aria-label="Row actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% stats.items.forEach(function(url) { %>
+            <tr data-code="<%= url.new %>">
+              <td class="tbl__td tbl__td--code">
+                <a class="code-chip" href="<%= urlFor('redirect', { params: { code: url.new } }) %>" target="_blank" rel="noopener noreferrer">
+                  <span class="code-chip__prefix" aria-hidden="true">/</span><%= url.new %>
+                </a>
+              </td>
+              <td class="tbl__td tbl__td--dest">
+                <a class="dest" href="<%= url.old %>" target="_blank" rel="noopener noreferrer" title="<%= url.old %>">
+                  <img class="dest__fav" src="https://www.google.com/s2/favicons?domain=<%- url.old.replace(/^https?:\/\//, '').split('/')[0].split(':')[0] %>&sz=32" alt="Favicon for <%= url.old %>" width="14" height="14" loading="lazy" />
+                  <span class="dest__text"><%= url.old %></span>
+                </a>
+              </td>
+              <td class="tbl__td tbl__td--hits">
+                <span class="hits <%= url.hits > 0 ? 'hits--live' : '' %>"><%= url.hits %></span>
+              </td>
+              <td class="tbl__td tbl__td--when">
+                <time datetime="<%= url.created %>"><%= url.created %></time>
+              </td>
+              <td class="tbl__td tbl__td--actions">
+                <a class="row-act" href="<%= urlFor('analytics', { params: { code: url.new } }) %>" aria-label="View analytics for /<%= url.new %>">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+                  <span>Stats</span>
+                </a>
+                <form method="post" action="<%= urlFor('deleteCode', { params: { code: url.new } }) %>" class="row-act row-act--delete" data-confirm="Delete /<%= url.new %>? This is permanent.">
+                  <button type="submit" class="row-act__btn" aria-label="Delete /<%= url.new %>">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    <span>Delete</span>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pager" aria-label="Pagination">
+      <% if (stats.has_prev) { %>
+        <a class="pager__btn" href="<%= urlFor('statsPage', { params: { page: stats.prev_num } }) %>&q=<%= encodeURIComponent(stats.q) %>&sort=<%= stats.sort %>" rel="prev">← Newer</a>
+      <% } else { %>
+        <span class="pager__btn pager__btn--off" aria-hidden="true">← Newer</span>
+      <% } %>
+      <span class="pager__count">Page <%= stats.page %> of <%= stats.totalPages %></span>
+      <% if (stats.has_next) { %>
+        <a class="pager__btn" href="<%= urlFor('statsPage', { params: { page: stats.next_num } }) %>&q=<%= encodeURIComponent(stats.q) %>&sort=<%= stats.sort %>" rel="next">Older →</a>
+      <% } else { %>
+        <span class="pager__btn pager__btn--off" aria-hidden="true">Older →</span>
+      <% } %>
+    </nav>
+  <% } %>
+</section>
+
+<%- include('partials/_footer', { pageScript: 'list.js' }) %>

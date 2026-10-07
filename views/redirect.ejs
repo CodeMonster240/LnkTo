@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+  redirect.ejs — the interstitial "redirect page" shown when a link has
+  `show_redirect_page` enabled. Displays a thumbnail of the destination with
+  a Canvas-based wormhole travel animation, and then auto-redirects.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting to <%= old %> — LnkTo</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="32x32" />
+    <link
+      rel="stylesheet"
+      href="<%= urlFor('static', { params: { filename: 'css/style.css' } }) %>"
+      type="text/css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Full-screen black canvas for the wormhole tunnel */
+      #wh-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+      }
+      #wh-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .wh-thumb {
+        width: 96px;
+        height: 96px;
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+        object-fit: cover;
+        z-index: 2;
+      }
+      .wh-domain {
+        margin-top: 12px;
+        font-size: 1rem;
+        color: rgba(244, 238, 226, 0.7);
+      }
+      .wh-skip {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        color: rgba(244, 238, 226, 0.4);
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .wh-skip:hover { color: var(--amber); }
+      .wh-stats-btn {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(15, 17, 21, 0.6);
+        color: rgba(244, 238, 226, 0.7);
+        border: 1px solid rgba(15, 17, 21, 0.2);
+        border-radius: var(--radius-sm);
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        backdrop-filter: blur(4px);
+      }
+      .wh-stats-btn:hover {
+        background: rgba(196, 90, 42, 0.2);
+        color: var(--amber);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="wh-canvas" width="1" height="1" aria-hidden="true"></canvas>
+    <div id="wh-overlay">
+      <% if (showThumbnail && thumbnailUrl) { %>
+        <img class="wh-thumb" src="<%= thumbnailUrl %>" alt="Thumbnail for <%= old %>" width="96" height="96" />
+      <% } %>
+      <div class="wh-domain">Redirecting to <%= domain %>…</div>
+    </div>
+    <a class="wh-skip" id="wh-skip" href="<%= old %>" rel="noopener noreferrer">Skip redirect</a>
+    <a class="wh-stats-btn" href="<%= urlFor('analytics', { params: { code } }) %>">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 12v6M4.22 4.22l4.24 4.24m-4.24 11.52l4.24-4.24M21 12h-6"/></svg>
+      <span>Detailed stats</span>
+    </a>
+
+    <script>
+    window.__REDIRECT_DATA = {
+        old: <%- JSON.stringify(old) %>,
+        duration: <%= duration %>,
+        showThumbnail: <%= showThumbnail ? 'true' : 'false' %>,
+      };
+    </script>
+    <script src="<%= urlFor('static', { params: { filename: 'js/redirect.js' } }) %>"></script>
+  </body>
+</html>

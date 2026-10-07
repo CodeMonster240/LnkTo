@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LnkTo. Short links, lasting trail." />
+    <meta name="og:title" property="og:title" content="LnkTo" />
+    <meta property="og:description" content="Short links, lasting trail." />
+    <title><%= typeof title !== 'undefined' && title ? title + ' · LnkTo' : 'LnkTo' %></title>
+    <link
+      rel="stylesheet"
+      href="<%= urlFor('static', { params: { filename: 'css/style.css' } }) %>"
+      type="text/css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="topbar" role="banner">
+      <div class="topbar__inner">
+        <a class="brand" href="<%= urlFor('index') %>" aria-label="LnkTo home">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5" />
+              <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" />
+            </svg>
+          </span>
+          <span class="brand__word">LnkTo</span>
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          <a class="topnav__link" href="<%= urlFor('index') %>" <%= typeof active !== 'undefined' && active === 'home' ? 'aria-current="page"' : '' %>>Shorten</a>
+          <a class="topnav__link" href="<%= urlFor('stats') %>" <%= typeof active !== 'undefined' && active === 'stats' ? 'aria-current="page"' : '' %>>All links</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="page" role="main">

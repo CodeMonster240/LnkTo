@@ -1,0 +1,159 @@
+<%- include('partials/_header', { title: '/' + data.url.new, active: 'stats' }) %>
+
+<section class="ana" aria-labelledby="ana-title">
+  <header class="ana__head">
+    <div class="ana__crumb">
+      <a href="<%= urlFor('stats') %>">All links</a>
+      <span aria-hidden="true">/</span>
+      <span>/<%= data.url.new %></span>
+    </div>
+    <h1 class="ana__title" id="ana-title">
+      <span class="ana__prefix">/</span><span class="ana__code"><%= data.url.new %></span>
+    </h1>
+    <a class="ana__target" href="<%= data.url.old %>" target="_blank" rel="noopener noreferrer">
+      <img class="ana__fav" src="https://www.google.com/s2/favicons?domain=<%- data.url.old.replace(/^https?:\/\//, '').split('/')[0].split(':')[0] %>&sz=32" alt="Favicon for <%= data.url.old %>" width="16" height="16" />
+      <span><%= data.url.old %></span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+    </a>
+  </header>
+
+  <ul class="kpis" aria-label="Summary">
+    <li class="kpi">
+      <p class="kpi__label">Total hits</p>
+      <p class="kpi__value" id="kpi-total-hits"><%= data.url.hits %></p>
+    </li>
+    <li class="kpi">
+      <p class="kpi__label">Last 7 days</p>
+      <p class="kpi__value" id="kpi-last7"><%= data.last7 %></p>
+    </li>
+    <li class="kpi">
+      <p class="kpi__label">Previous 7 days</p>
+      <p class="kpi__value"><%= data.prev7 %></p>
+    </li>
+    <li class="kpi">
+      <p class="kpi__label">Trend</p>
+      <p class="kpi__value">
+        <% if (data.trend === null) { %>&mdash;<% } else if (data.trend > 0) { %>
+          <span class="trend trend--up">+<%= data.trend %>%</span>
+        <% } else if (data.trend < 0) { %>
+          <span class="trend trend--down"><%= data.trend %>%</span>
+        <% } else { %>
+          <span class="trend">0%</span>
+        <% } %>
+      </p>
+    </li>
+    <li class="kpi">
+      <p class="kpi__label">Created</p>
+      <p class="kpi__value kpi__value--small"><time datetime="<%= data.url.created %>"><%= data.url.created %></time></p>
+    </li>
+  </ul>
+
+  <article class="card" aria-labelledby="chart-title">
+    <header class="card__head">
+      <h2 class="card__title" id="chart-title">Daily hits, last 14 days</h2>
+      <p class="card__sub">Peak day: <strong><%= data.peak %></strong> click<%= data.peak === 1 ? '' : 's' %></p>
+    </header>
+    <% var max = Math.max(1, data.peak); %>
+    <div class="chart" role="img" aria-label="Bar chart of daily hits over the last 14 days. Peak: <%= data.peak %>.">
+      <% data.series.forEach(function(d) { %>
+        <div class="chart__col" title="<%= d.day %>: <%= d.count %> hit<%= d.count === 1 ? '' : 's' %>">
+          <div class="chart__bar" style="height: <%= Math.max(2, Math.round((d.count / max) * 100)) %>%"></div>
+          <span class="chart__day"><%= d.day.slice(5) %></span>
+        </div>
+      <% }); %>
+    </div>
+  </article>
+
+  <div class="card-row">
+    <article class="card" aria-labelledby="refs-title">
+      <header class="card__head">
+        <h2 class="card__title" id="refs-title">Top referrers</h2>
+      </header>
+      <% if (data.referrers.length === 0) { %>
+        <p class="card__empty">No referrer data yet. Share the link to start the trail.</p>
+      <% } else { %>
+        <ul class="ranked">
+          <% var refMax = data.referrers[0].c; %>
+          <% data.referrers.forEach(function(r) { %>
+            <li class="ranked__item">
+              <span class="ranked__label"><%= r.host %></span>
+              <span class="ranked__bar" aria-hidden="true">
+                <span class="ranked__fill" style="width: <%= Math.round((r.c / refMax) * 100) %>%"></span>
+              </span>
+              <span class="ranked__count"><%= r.c %></span>
+            </li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </article>
+
+    <article class="card" aria-labelledby="devs-title">
+      <header class="card__head">
+        <h2 class="card__title" id="devs-title">Devices</h2>
+      </header>
+      <% if (data.devices.length === 0) { %>
+        <p class="card__empty">No device data yet.</p>
+      <% } else { %>
+        <ul class="ranked">
+          <% var devMax = data.devices[0].c; %>
+          <% data.devices.forEach(function(d) { %>
+            <li class="ranked__item">
+              <span class="ranked__label"><%= d.device %></span>
+              <span class="ranked__bar" aria-hidden="true">
+                <span class="ranked__fill" style="width: <%= Math.round((d.c / devMax) * 100) %>%"></span>
+              </span>
+              <span class="ranked__count"><%= d.c %></span>
+            </li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </article>
+  </div>
+
+  <article class="card" aria-labelledby="recent-title">
+    <header class="card__head">
+      <h2 class="card__title" id="recent-title">Recent hits</h2>
+      <p class="card__sub">Last <%= data.recent.length %> click<%= data.recent.length === 1 ? '' : 's' %></p>
+    </header>
+    <% if (data.recent.length === 0) { %>
+      <p class="card__empty">No clicks recorded yet. Open the short link to log one.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="tbl tbl--compact">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>Referrer</th>
+              <th>Device</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% data.recent.forEach(function(h) { %>
+              <tr>
+                <td><time datetime="<%= h.ts %>"><%= h.ts %></time></td>
+                <td class="tbl__td--ellipsis"><%= h.referrer || 'Direct / none' %></td>
+                <td><%= h.device || 'Unknown' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </article>
+
+    <div class="ana__actions">
+    <a class="btn btn--ghost" href="<%= urlFor('settings', { params: { code: data.url.new } }) %>">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 12v6M4.22 4.22l4.24 4.24m-4.24 11.52l4.24-4.24M21 12h-6m12 0h-6m-6 6h6"/></svg>
+      <span>Settings</span>
+    </a>
+    <a class="btn btn--ghost" href="<%= urlFor('stats') %>">← Back to all links</a>
+    <form method="post" action="<%= urlFor('deleteCode', { params: { code: data.url.new } }) %>" data-confirm="Delete /<%= data.url.new %>? All analytics for this link will be removed.">
+      <button type="submit" class="btn btn--danger">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        <span>Delete this link</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/_footer', { pageScript: 'analytics.js' }) %>

@@ -1,0 +1,19 @@
+<%- include('partials/_header', { title: 'Not found' }) %>
+
+<section class="notfound" aria-labelledby="nf-title">
+  <p class="notfound__eyebrow">404</p>
+  <h1 class="notfound__title" id="nf-title">This trail is cold.</h1>
+  <p class="notfound__sub">
+    <% if (typeof missingCode !== 'undefined' && missingCode) { %>
+      The short code <code>/<%= missingCode %></code> doesn't exist (or was deleted).
+    <% } else { %>
+      That page is not part of LnkTo.
+    <% } %>
+  </p>
+  <div class="notfound__actions">
+    <a class="btn btn--ink" href="<%= urlFor('index') %>">Shorten a URL</a>
+    <a class="btn btn--ghost" href="<%= urlFor('stats') %>">Browse all links</a>
+  </div>
+</section>
+
+<%- include('partials/_footer') %>

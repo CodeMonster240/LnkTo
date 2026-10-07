@@ -1,0 +1,23 @@
+    </main>
+
+    <footer class="foot" role="contentinfo">
+      <div class="foot__inner">
+        <p class="foot__line">
+          <span class="foot__brand">LnkTo</span>
+          <span class="foot__sep" aria-hidden="true">·</span>
+          <span>Short links, lasting trail.</span>
+        </p>
+        <p class="foot__meta">
+          <a class="foot__link" href="<%= urlFor('static', { params: { filename: '../../README.md' } }) %>">Source</a>
+          <span class="foot__sep" aria-hidden="true">·</span>
+          <span>Running locally on Node.js</span>
+        </p>
+      </div>
+    </footer>
+
+         <% if (typeof pageScript !== 'undefined' && pageScript) { %>
+      <script defer src="<%= urlFor('static', { params: { filename: 'js/wsClient.js' } }) %>"></script>
+      <script defer src="<%= urlFor('static', { params: { filename: 'js/' + pageScript } }) %>"></script>
+    <% } %>
+  </body>
+</html>
