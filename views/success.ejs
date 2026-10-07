@@ -20,7 +20,7 @@
   <a class="result__target" href="<%= old %>" target="_blank" rel="noopener noreferrer">
     <img
       class="result__favicon"
-      src="https://www.google.com/s2/favicons?domain=<%- old.replace(/^https?:///, '").split('/')[0].split(':')[0] %>src="https://www.google.com/s2/favicons?domain=<%= old %>&sz=32"sz=32"
+      src="https://www.google.com/s2/favicons?domain=<%= old.replace(/^https?:\/\//, '').split('/')[0].split(':')[0] %>&sz=32"
       alt="Favicon for <%= old %>"
       width="16" height="16"
     />
