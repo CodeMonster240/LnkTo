@@ -1,6 +1,4 @@
 // ---------------------------------------------------------------------------
-// db.js — equivalent of `url/models.py` + `app.py`'s `db = SQLAlchemy(app)`.
-//
 // We use `better-sqlite3` because it's synchronous, has zero external
 // setup, and gives us a single-file SQLite DB the same way the Python
 // version did. Synchronous calls are fine here because the DB is local
@@ -10,8 +8,8 @@
 //   urls(id, old, new, hits, created)
 //   hits(id, url_id FK ON DELETE CASCADE, ts, referrer, user_agent, device)
 //
-// The `hits` table is new — the Python port only stored a counter. We
-// keep a row per redirect so the analytics page can show time series,
+// The `hits` table keeps a row per redirect so the analytics page can show
+// time series,
 // referrers, devices, and a recent-activity feed.
 // ---------------------------------------------------------------------------
 'use strict';

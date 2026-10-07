@@ -1,8 +1,5 @@
 // ---------------------------------------------------------------------------
-// app.js — Express application factory. Equivalent of the Python `app.py`
-// (creates the Flask app, configures it, wires up CSRF — but in our case
-// CSRF is unnecessary because ALTCHA itself is the spam protection, which
-// is the same stance the Python code took once ALTCHA was added).
+// app.js — Express application factory.
 // ---------------------------------------------------------------------------
 'use strict';
 
@@ -24,8 +21,8 @@ function createApp() {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
 
-  // Mirror Flask's `SERVER_NAME` behaviour: in local dev, url_for() builds
-  // http://localhost:5001/... In prod (SERVER_NAME null), we use the
+  // In local dev, url_for() builds http://localhost:5001/... In prod
+  // (SERVER_NAME null), we use the
   // request's actual host.
   if (SERVER_NAME) {
     app.set('trust proxy', false);
@@ -35,8 +32,7 @@ function createApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
-  // Expose a global `urlFor` to every template, matching how Flask
-  // exposes `url_for` in Jinja2 contexts.
+  // Expose a global `urlFor` to every template.
   app.use((req, res, next) => {
     res.locals.urlFor = (name, opts = {}) => urlFor(name, opts, req);
     res.locals.request = req;
@@ -44,11 +40,10 @@ function createApp() {
     next();
   });
 
-  // Static files at /static (matches the Python url_for('static', ...)).
+  // Static files at /static.
   app.use('/static', express.static(STATIC_DIR));
 
-  // favicon.ico — also served from /static, but the Python app
-  // explicitly served it from root too, so keep the alias.
+  // Also serve the favicon from the root path.
   app.get('/favicon.ico', (req, res) => {
     res.sendFile(path.join(STATIC_DIR, 'favicon.ico'));
   });
@@ -61,7 +56,7 @@ function createApp() {
   app.use(indexRoutes);
   app.use(redirectRoutes); // :code — must be last
 
-  // 404 handler — same as the Python @app.errorhandler(404).
+  // 404 handler.
   app.use((req, res) => {
     res.status(404).render('404');
   });
@@ -73,8 +68,7 @@ function createApp() {
     res.status(500).send('Internal Server Error');
   });
 
-  // Stash the secret so other modules can use it (kept for parity with
-  // settings.SECRET_KEY; not strictly required by Express itself).
+  // Stash the secret so other modules can use it.
   app.set('SECRET_KEY', SECRET_KEY);
   app.set('DEBUG', DEBUG);
 

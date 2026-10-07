@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ---------------------------------------------------------------------------
-// server.js — entry point. Equivalent of `main.py` + `run.py` + `wsgi.py`.
+// server.js — long-running Node.js entry point for local and VM hosting.
 //   1. Initialises the SQLite DB (idempotent — uses CREATE TABLE IF NOT EXISTS).
 //   2. Starts Express on 0.0.0.0:5001 (override via HOST / PORT).
 //   3. Attaches the WebSocket server (lib/wsServer.js) for live updates.
