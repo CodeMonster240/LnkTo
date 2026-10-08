@@ -43,6 +43,8 @@ const SQLITE_PATH = process.env.LNKTO_DATABASE_FILE
   || path.join(DB_DIR, 'shortener.db');
 const LNKTO_DATABASE_URL = process.env.LNKTO_DATABASE_URL
   || `sqlite:///${SQLITE_PATH}`;
+const TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL || '';
+const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN || '';
 
 // --- Static ----------------------------------------------------------------
 const STATIC_DIR = path.join(APPLICATION_DIR, 'public');
@@ -66,6 +68,8 @@ module.exports = {
   DEBUG,
   DB_DIR,
   LNKTO_DATABASE_URL,
+  TURSO_DATABASE_URL,
+  TURSO_AUTH_TOKEN,
   SQLITE_PATH,
   STATIC_DIR,
   SERVER_NAME,

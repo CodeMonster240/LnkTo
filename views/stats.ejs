@@ -64,7 +64,7 @@
           <% stats.items.forEach(function(url) { %>
             <tr data-code="<%= url.new %>">
               <td class="tbl__td tbl__td--code">
-                <a class="code-chip" href="/stats/<%= url.new %>" rel="noopener noreferrer">
+                <a class="code-chip" href="<%= urlFor('redirect', { params: { code: url.new } }) %>" rel="noopener noreferrer">
                   <span class="code-chip__prefix" aria-hidden="true">/</span><%= url.new %>
                 </a>
               </td>

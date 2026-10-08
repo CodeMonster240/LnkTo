@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   // 1) Honeypot — silently reject if a bot filled in the hidden field.
   //    We pretend the request succeeded so the bot doesn't retry.
   const honeypot = (req.body && req.body.website_url) || '';
@@ -54,7 +54,7 @@ router.post('/', (req, res) => {
       });
     }
     const { isCodeAvailable } = require('../lib/code');
-    if (!isCodeAvailable(customCode)) {
+    if (!(await isCodeAvailable(customCode))) {
       return res.status(400).render('index', {
         form: { errors: { custom_code: `That custom link /${customCode} is already taken. Pick another.` } },
         renderedAt: Date.now(),
@@ -66,7 +66,7 @@ router.post('/', (req, res) => {
     const { generateUniqueCode, MAX_LENGTH } = require('../lib/code');
     const safeLen = Math.min(Math.max(3, codeLen), MAX_LENGTH);
     try {
-      code = generateUniqueCode(safeLen);
+      code = await generateUniqueCode(safeLen);
     } catch (err) {
       console.error(err);
       return res.status(500).send('Could not allocate a short code.');
@@ -105,9 +105,10 @@ router.post('/', (req, res) => {
   const redirectDuration = parseInt((req.body && req.body.redirect_duration) || '3', 10);
   const showThumbnail = (req.body && req.body.show_thumbnail) === 'on' || req.body.show_thumbnail === '1';
 
-  const row = Url.create({
+  const row = await Url.create({
     old,
     new: code,
+    ownerTokenHash: req.ownerTokenHash,
     settings: {
       showRedirectPage,
       redirectDuration: Math.min(Math.max(1, redirectDuration), 30),

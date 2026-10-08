@@ -4,8 +4,7 @@
 // Hard-deletes a short link and cascades its hits (via FK ON DELETE
 // CASCADE). After deletion the short code is freed and can be re-used
 // by a future submission. Bot protection is intentionally light here —
-// anyone who has the URL can delete (matches the spirit of the app:
-// it's a single-user public tool, not multi-tenant).
+// only the browser that created the link can delete it.
 // ---------------------------------------------------------------------------
 'use strict';
 
@@ -14,9 +13,9 @@ const { Url } = require('../db');
 
 const router = express.Router();
 
-router.post('/delete/:code', (req, res) => {
+router.post('/delete/:code', async (req, res, next) => {
   const code = req.params.code;
-  const removed = Url.deleteByCode(code);
+  const removed = await Url.deleteByCode(code, req.ownerTokenHash);
   if (!removed) {
     return res.status(404).render('404', { missingCode: code });
   }

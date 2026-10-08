@@ -14,19 +14,22 @@ const { isCodeAvailable } = require('../lib/code');
 const router = express.Router();
 
 // GET /settings/:code — settings page for a specific link.
-router.get('/settings/:code', (req, res) => {
-  const data = Url.analytics(req.params.code);
+router.get('/settings/:code', async (req, res, next) => {
+  try {
+  const data = await Url.analytics(req.params.code, req.ownerTokenHash);
   if (!data) {
     return res.status(404).render('404', { missingCode: req.params.code });
   }
-  const settings = Url.settings(req.params.code);
+  const settings = await Url.settings(req.params.code, req.ownerTokenHash);
   res.render('settings', { code: req.params.code, data, settings });
+  } catch (err) { next(err); }
 });
 
 // POST /settings/:code — save settings, redirect back to analytics.
-router.post('/settings/:code', (req, res) => {
+router.post('/settings/:code', async (req, res, next) => {
+  try {
   const code = req.params.code;
-  const existing = Url.findByCode(code);
+  const existing = await Url.analytics(code, req.ownerTokenHash);
   if (!existing) {
     return res.status(404).render('404', { missingCode: code });
   }
@@ -38,23 +41,26 @@ router.post('/settings/:code', (req, res) => {
   const showThumbnail =
     req.body.show_thumbnail === 'on' || req.body.show_thumbnail === '1';
 
-  Url.updateSettings(code, {
+  await Url.updateSettings(code, {
     showRedirectPage,
     redirectDuration,
     showThumbnail,
-  });
+  }, req.ownerTokenHash);
 
   res.redirect('/stats?msg=settings-saved');
+  } catch (err) { next(err); }
 });
 
 // GET /api/check-code/:code — live availability check for the custom-link popup.
-router.get('/api/check-code/:code', (req, res) => {
+router.get('/api/check-code/:code', async (req, res, next) => {
+  try {
   const code = req.params.code;
   if (!/^[A-Za-z0-9_-]{3,50}$/.test(code)) {
     return res.json({ available: false, reason: 'Invalid characters or length' });
   }
-  const available = isCodeAvailable(code);
+  const available = await isCodeAvailable(code);
   res.json({ available, reason: available ? null : 'Already taken' });
+  } catch (err) { next(err); }
 });
 
 module.exports = router;

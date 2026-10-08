@@ -17,12 +17,12 @@ const router = express.Router();
 
 const RESERVED = new Set(['static', 'stats', 'delete', 'api', 'admin', 'settings']);
 
-router.get('/:code', (req, res, next) => {
+router.get('/:code', async (req, res, next) => {
   const code = req.params.code;
   if (RESERVED.has(code)) return next();
   if (!/^[A-Za-z0-9_-]{1,50}$/.test(code)) return next();
 
-  const existing = Url.findWithSettings(code);
+  const existing = await Url.findWithSettings(code);
   if (!existing) {
     return next();
   }
@@ -30,7 +30,7 @@ router.get('/:code', (req, res, next) => {
   const ua = parseUserAgent(req.get('user-agent') || '');
   const referrer = req.get('referer') || req.get('referrer') || '';
 
-  const updated = Url.recordHit(code, {
+  const updated = await Url.recordHit(code, {
     referrer,
     userAgent: req.get('user-agent') || '',
     device: ua.device,

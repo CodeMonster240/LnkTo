@@ -14,6 +14,8 @@ A URL shortener built with Node.js, Express, EJS, and SQLite.
 - Case-sensitive. SQLite stores the values exactly as written.
 - A Stats page lists all the shortened URLs, and shows how many times a
   target link has been redirected (paginated, 10 per page).
+- Link management and analytics are private to the browser that created each
+  link, using a cryptographically random persistent cookie.
 - A button automatically copies the shortened URL to clipboard.
 - **No-CAPTCHA bot check** using a hidden honeypot field plus a
   time-based submit threshold — no third-party service, no JavaScript
@@ -52,16 +54,30 @@ It installs `node_modules` if missing and then runs `npm start`.
    function in `api/index.js`; do not select Flask or add a Python build
    command.
 3. Set **Node.js Version** to 18 or newer in Project Settings.
-4. Add `SECRET_KEY` as an environment variable, then deploy.
+4. Create a Turso database and database token:
+
+   ```bash
+   turso db create lnkto
+   turso db show lnkto
+   turso db tokens create lnkto
+   ```
+
+   Copy the `libsql://...` URL from `turso db show` and the token printed by
+   `turso db tokens create`. Add them as `TURSO_DATABASE_URL`,
+   `TURSO_AUTH_TOKEN`, and `SECRET_KEY` environment variables in Vercel.
+   Do not include quotes or surrounding whitespace in either Turso value.
+   Ensure the variables are enabled for the deployment's environment
+   (usually **Production**), then redeploy. `TURSO_DATABASE_URL` switches the
+   app to the persistent Turso database.
 
 The `vercel.json` file sends every request to the Express function. Vercel
 functions do not support the long-running WebSocket server, so live updates
 are disabled there while normal pages and redirects continue to work.
 
-SQLite files in Vercel functions are temporary and can be reset between
-deployments or function instances. This setup is suitable for a demo or
-single warm instance; use a persistent hosted database before relying on it
-for production data.
+Do not use the local SQLite fallback for production on Vercel. Serverless
+instances have separate ephemeral files, so a link created by one instance can
+return a 404 when its redirect request reaches another instance. Turso
+provides the persistent SQLite-compatible store required for production.
 
 ### Environment variables
 
@@ -75,10 +91,18 @@ The behavior is controlled by environment variables or a local `.env` file.
 | `LNKTO_ENV`           | (unset)                | `production` disables the dev-only server name.|
 | `LNKTO_DB_DIR`        | `~/LnkTo_data`         | Folder holding `shortener.db`.                |
 | `LNKTO_DATABASE_URL`  | `sqlite:///$LNKTO_DB_DIR/shortener.db` | Full SQLite URL override.        |
+| `TURSO_DATABASE_URL`  | (unset) | Persistent Turso/libSQL URL used on Vercel. |
+| `TURSO_AUTH_TOKEN`    | (unset) | Authentication token for `TURSO_DATABASE_URL`. |
 | `HOST` / `PORT`       | `0.0.0.0` / `5001`     | Server bind address / port.                   |
 
 > We deliberately do **not** read `DATABASE_URL`. Use
 > `LNKTO_DATABASE_URL` instead so the database driver is unambiguous.
+
+If the app reports Turso HTTP 401, the database URL is reachable but the
+token was rejected. Generate a fresh token for the exact database named in
+`TURSO_DATABASE_URL`, replace the Vercel `TURSO_AUTH_TOKEN` value in the
+correct environment, and create a new deployment. Never commit the token or
+put it in `.env.example`.
 
 ## Project layout
 
@@ -127,3 +151,8 @@ The behavior is controlled by environment variables or a local `.env` file.
   process (Render, Fly, Railway, a VM, etc.) is `node server.js` behind a
   reverse proxy, or `pm2 start server.js`. Vercel uses `api/index.js`.
 - **Database** — `better-sqlite3` uses hand-written prepared statements.
+- **Ownership** — the app sets an HttpOnly `lnkto_session` cookie for each
+  browser. A SHA-256 hash of that token is stored with each link, so the raw
+  token is never stored in the database or exposed in URLs. The cookie lasts
+  ten years and is independent of the browser cache, though clearing site
+  cookies or using a different browser creates a new identity.

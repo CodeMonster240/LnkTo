@@ -3,10 +3,12 @@
 // ---------------------------------------------------------------------------
 'use strict';
 
+require('express-async-errors');
 const path = require('path');
 const express = require('express');
 const { urlFor } = require('./lib/urlFor');
 const { STATIC_DIR, DEBUG, SERVER_NAME, SECRET_KEY } = require('./config');
+const { ensureSession } = require('./lib/session');
 
 const indexRoutes = require('./routes/index');
 const statsRoutes = require('./routes/stats');
@@ -31,6 +33,7 @@ function createApp() {
   // Body parsing for the POST form.
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.use(ensureSession);
 
   // Expose a global `urlFor` to every template.
   app.use((req, res, next) => {
